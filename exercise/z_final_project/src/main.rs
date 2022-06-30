@@ -38,32 +38,47 @@ fn main() {
     }
     let subcommand = args.remove(0);
     match subcommand.as_str() {
-        // EXAMPLE FOR CONVERSION OPERATIONS
         "blur" => {
-            if args.len() != 2 {
-                print_usage_and_exit();
-            }
-            let infile = args.remove(0);
-            let outfile = args.remove(0);
-            // **OPTION**
-            // Improve the blur implementation -- see the blur() function below
-            blur(infile, outfile);
+            let blur_amount: f32 = args.remove(0).parse().unwrap_or(0.0);
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            blur(infile, outfile, blur_amount);
         }
 
         // **OPTION**
         // Brighten -- see the brighten() function below
+        "brighten" => {
+            let brighten_amount: i32 = args.remove(0).parse().unwrap_or(0);
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            brighten(infile, outfile, brighten_amount);
+        }
 
         // **OPTION**
         // Crop -- see the crop() function below
+        "crop" => {
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            crop(infile, outfile);
+        }
 
         // **OPTION**
         // Rotate -- see the rotate() function below
+        "rotate" => {
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            rotate(infile, outfile);
+        }
 
         // **OPTION**
         // Invert -- see the invert() function below
+        "invert" => {
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            invert(infile, outfile);
+        }
 
         // **OPTION**
         // Grayscale -- see the grayscale() function below
+        "grayscale" => {
+            let (infile, outfile) = get_infile_and_outfile(&mut args);
+            grayscale(infile, outfile);
+        }
 
         // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
         "fractal" => {
@@ -88,31 +103,39 @@ fn print_usage_and_exit() {
     println!("USAGE (when in doubt, use a .png extension on your filenames)");
     println!("blur INFILE OUTFILE");
     println!("fractal OUTFILE");
-    // **OPTION**
-    // Print useful information about what subcommands and arguments you can use
-    // println!("...");
     std::process::exit(-1);
 }
 
-fn blur(infile: String, outfile: String) {
+fn get_infile_and_outfile(args: &mut Vec<String>) -> (String, String) {
+    if args.len() != 2 {
+        print_usage_and_exit();
+    }
+    let infile = args.remove(0);
+    let outfile = args.remove(0);
+    return (infile, outfile);
+}
+
+fn blur(infile: String, outfile: String, blur: f32) {
     // Here's how you open an existing image file
     let img = image::open(infile).expect("Failed to open INFILE.");
     // **OPTION**
     // Parse the blur amount (an f32) from the command-line and pass it through
     // to this function, instead of hard-coding it to 2.0.
-    let img2 = img.blur(2.0);
+    let img2 = img.blur(blur);
     // Here's how you save an image to a file.
     img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
-fn brighten(infile: String, outfile: String) {
+fn brighten(infile: String, outfile: String, brightness: i32) {
     // See blur() for an example of how to open / save an image.
-
     // .brighten() takes one argument, an i32.  Positive numbers brighten the
     // image. Negative numbers darken it.  It returns a new image.
 
     // Challenge: parse the brightness amount from the command-line and pass it
     // through to this function.
+    let img = image::open(infile).expect("Failed to open INFILE.");
+    let img2 = img.brighten(brightness);
+    img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
 fn crop(infile: String, outfile: String) {
@@ -125,6 +148,10 @@ fn crop(infile: String, outfile: String) {
     // through to this function.
 
     // See blur() for an example of how to save the image.
+    let mut img = image::open(infile).expect("Failed to open INFILE.");
+    let img2 = img.crop(10, 10, 100, 100);
+
+    img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
 fn rotate(infile: String, outfile: String) {
